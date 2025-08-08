@@ -1,0 +1,58 @@
+#include<iostream>
+#include<ctime>
+#include<cstdlib>
+using namespace std;
+
+int main()
+{
+    int nf, N;          // nf = number of frames, N = window size
+    int no_tr = 0;      // no_tr counts total transmissions (including retransmissions)
+    srand(time(NULL));  // Seed random generator with current time
+
+    cout << "Enter the number of frames : ";
+    cin >> nf;
+
+    cout << "Enter the Window Size : ";
+    cin >> N;
+
+    int i = 1;          // frame 1
+
+    while(i <= nf)      // Loop till all frames
+    {
+        int x = 0;      //  counts no. of frames ack su...
+
+        // Send frames from i to i+N-1 (or up to nf)
+        for(int j = i; j < i + N && j <= nf; j++)
+        {
+            cout << "Sent Frame " << j << endl;
+            no_tr++;   // Increment total transmissions
+        }
+
+        // Check acknowledgments 
+        for(int j = i; j < i + N && j <= nf; j++)
+        {
+            int flag = rand() % 2;  // Random 0 or 1 simulates ACK (0) or loss (1)
+
+            if(!flag)  // If flag == 0
+            {
+                cout << "Acknowledgment for Frame " << j << endl;
+                x++;   // Count this successful acknowledgment
+            }
+            else       // Frame lost
+            {
+                cout << "Frame " << j << " Not Received" << endl;
+                cout << "Retransmitting Window" << endl;
+                break; // Stop checking ACKs and retransmit entire window starting from i
+            }
+        }
+
+        cout << endl;
+
+        
+        i += x; //move window forward by no. succ ack
+    }
+
+    cout << "Total number of transmissions : " << no_tr << endl;
+
+    return 0;
+}
