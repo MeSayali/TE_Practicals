@@ -1,0 +1,5 @@
+LDA X 
+ADD 5 
+MOV R1,A 
+MOV R2,1 
+MOV R3,9 

@@ -1,0 +1,3 @@
+INCR X
+PRINT A,Z=9
+
