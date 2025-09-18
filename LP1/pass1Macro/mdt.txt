@@ -1,0 +1,9 @@
+MDT
+1	ADD (P,0) 
+2	M2 (P,1) ; Call nested macro inside 
+3	MEND
+4	SUB (P,0) 
+5	M3 (P,1) ; Another nested macro inside 
+6	MEND
+7	MULT (P,0) 
+8	MEND

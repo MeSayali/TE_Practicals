@@ -1,0 +1,4 @@
+PNTAB (Macro → Parameters)
+M1 : X Y 
+M2 : P 
+M3 : Q 
