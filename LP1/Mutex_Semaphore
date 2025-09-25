@@ -11,7 +11,7 @@ void wait(int& s) { //means  resource is unavailable.
     if (s <= 0) {
         throw runtime_error("Semaphore underflow: resource unavailable!");
     } else {
-        s--;//esource available then we decrease it measn it s taken
+        s--;//resource available then we decrease it measn it s taken
     }
 }
 
