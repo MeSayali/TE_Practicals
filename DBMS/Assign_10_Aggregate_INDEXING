@@ -1,0 +1,236 @@
+te31453_db> db.sales.insertMany([
+...   { _id: 1, Product: "Laptop", category: "Electronics", price: 60000, quantity: 3 },
+...   { _id: 2, Product: "Chair", category: "Furniture", price: 1500, quantity: 2 },
+...   { _id: 3, Product: "Mouse", category: "Electronics", price: 500, quantity: 5 },
+...   { _id: 4, Product: "Table", category: "Furniture", price: 7000, quantity: 1 },
+...   { _id: 5, Product: "Monitor", category: "Electronics", price: 15000, quantity: 2 },
+...   { _id: 6, Product: "Pen", category: "Stationery", price: 10, quantity: 100 },
+...   { _id: 7, Product: "Notebook", category: "Stationery", price: 50, quantity: 40 }
+... ])
+... 
+{
+  acknowledged: true,
+  insertedIds: { '0': 1, '1': 2, '2': 3, '3': 4, '4': 5, '5': 6, '6': 7 }
+}
+========================================
+te31453_db> db.sales.find()
+[
+  {
+    _id: 1,
+    Product: 'Laptop',
+    category: 'Electronics',
+    price: 60000,
+    quantity: 3
+  },
+  {
+    _id: 2,
+    Product: 'Chair',
+    category: 'Furniture',
+    price: 1500,
+    quantity: 2
+  },
+  {
+    _id: 3,
+    Product: 'Mouse',
+    category: 'Electronics',
+    price: 500,
+    quantity: 5
+  },
+  {
+    _id: 4,
+    Product: 'Table',
+    category: 'Furniture',
+    price: 7000,
+    quantity: 1
+  },
+  {
+    _id: 5,
+    Product: 'Monitor',
+    category: 'Electronics',
+    price: 15000,
+    quantity: 2
+  },
+  {
+    _id: 6,
+    Product: 'Pen',
+    category: 'Stationery',
+    price: 10,
+    quantity: 100
+  },
+  {
+    _id: 7,
+    Product: 'Notebook',
+    category: 'Stationery',
+    price: 50,
+    quantity: 40
+  }
+]
+te31453_db>
+======================================
+te31453_db> db.sales.aggregate([
+...   {
+...     $group: {
+...       _id: "$category",
+...       totalsales: { $sum: { $multiply: ["$price", "$quantity"] } }
+...     }
+...   }
+... ])
+... 
+[
+  { _id: 'Electronics', totalsales: 212500 },
+  { _id: 'Stationery', totalsales: 3000 },
+  { _id: 'Furniture', totalsales: 10000 }
+]
+te31453_db> 
+
+==================
+MAX
+
+te31453_db> db.sales.aggregate([
+...   { $group: { _id: "$category", maxPrice: { $max: "$price" } } }
+... ])
+[
+  { _id: 'Stationery', maxPrice: 50 },
+  { _id: 'Furniture', maxPrice: 7000 },
+  { _id: 'Electronics', maxPrice: 60000 }
+]
+=====================================
+Min
+
+te31453_db> db.sales.aggregate([
+...   { $group: { _id: "$category", minPrice: { $min: "$price" } } }
+... ])
+[
+  { _id: 'Furniture', minPrice: 1500 },
+  { _id: 'Stationery', minPrice: 10 },
+  { _id: 'Electronics', minPrice: 500 }
+]
+
+=======================================
+Sum of all quantities
+te31453_db> db.sales.aggregate([
+...   { $group: { _id: null, totalQuantity: { $sum: "$quantity" } } }
+... ])
+[ { _id: null, totalQuantity: 153 } ]
+te31453_db> 
+=============================
+Avg
+
+te31453_db> db.sales.aggregate([
+...   {
+...     $group: {
+...       _id: "$category",
+...       avgPrice: { $avg: "$price" }
+...     }
+...   }
+... ])
+... 
+[
+  { _id: 'Electronics', avgPrice: 25166.666666666668 },
+  { _id: 'Stationery', avgPrice: 30 },
+  { _id: 'Furniture', avgPrice: 4250 }
+]
+te31453_db> 
+
+======================================================================
+indexing
+te31453_db> db.sales.createIndex({category:1});
+category_1
+te31453_db> db.sales.getIndexes();
+[
+  { v: 2, key: { _id: 1 }, name: '_id_', ns: 'te31453_db.sales' },
+  {
+    v: 2,
+    key: { category: 1 },
+    name: 'category_1',
+    ns: 'te31453_db.sales'
+  }
+]
+
+te31453_db> db.sales.find({category:"Electronics"}).explain("executionStats")
+
+... 
+{
+  queryPlanner: {
+    plannerVersion: 1,
+    namespace: 'te31453_db.sales',
+    indexFilterSet: false,
+    parsedQuery: { category: { '$eq': 'Electronics' } },
+    winningPlan: {
+      stage: 'FETCH',
+      inputStage: {
+        stage: 'IXSCAN',
+        keyPattern: { category: 1 },
+        indexName: 'category_1',
+        isMultiKey: false,
+        multiKeyPaths: { category: [] },
+        isUnique: false,
+        isSparse: false,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: { category: [ '["Electronics", "Electronics"]' ] }
+      }
+    },
+    rejectedPlans: []
+  },
+  executionStats: {
+    executionSuccess: true,
+    nReturned: 3,
+    executionTimeMillis: 2,
+    totalKeysExamined: 3,
+    totalDocsExamined: 3,
+    executionStages: {
+      stage: 'FETCH',
+      nReturned: 3,
+      executionTimeMillisEstimate: 0,
+      works: 4,
+      advanced: 3,
+      needTime: 0,
+      needYield: 0,
+      saveState: 0,
+      restoreState: 0,
+      isEOF: 1,
+      docsExamined: 3,
+      alreadyHasObj: 0,
+      inputStage: {
+        stage: 'IXSCAN',
+        nReturned: 3,
+        executionTimeMillisEstimate: 0,
+        works: 4,
+        advanced: 3,
+        needTime: 0,
+        needYield: 0,
+        saveState: 0,
+        restoreState: 0,
+        isEOF: 1,
+        keyPattern: { category: 1 },
+        indexName: 'category_1',
+        isMultiKey: false,
+        multiKeyPaths: { category: [] },
+        isUnique: false,
+        isSparse: false,
+        isPartial: false,
+        indexVersion: 2,
+        direction: 'forward',
+        indexBounds: { category: [ '["Electronics", "Electronics"]' ] },
+        keysExamined: 3,
+        seeks: 1,
+        dupsTested: 0,
+        dupsDropped: 0
+      }
+    }
+  },
+  serverInfo: {
+    host: 'dbsl-21',
+    port: 27017,
+    version: '4.2.13',
+    gitVersion: '82dd40f60c55dae12426c08fd7150d79a0e28e23'
+  },
+  ok: 1
+}
+te31453_db> 
+
+------------------------------------------
+
+
